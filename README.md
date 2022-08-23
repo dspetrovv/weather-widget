@@ -7,7 +7,8 @@ Build the project
 
 ### Usage
 Now embed on your cite
-
-  <script defer="defer" src="weather-widget.js"></script>
-  <link href="weather-widget.css" rel="stylesheet">
-  <weather-widget></weather-widget>
+```
+<script defer="defer" src="weather-widget.js"></script>
+<link href="weather-widget.css" rel="stylesheet">
+<weather-widget></weather-widget>
+```
