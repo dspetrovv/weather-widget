@@ -1,8 +1,14 @@
 # Weather widget
 
 ### Important
-Installation: npm i --save --legacy-peer-deps
+Installation
+```
+npm i --save --legacy-peer-deps
+```
 Create .env file with VUE_APP_API_KEY variable
+```
+VUE_APP_API_KEY = your_key
+```
 Build the project
 
 ### Usage
