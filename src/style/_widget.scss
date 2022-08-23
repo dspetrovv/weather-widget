@@ -1,0 +1,47 @@
+.widget {
+  width: $width;
+  padding: 10px;
+  position: relative;
+  overflow-y: auto;
+  height: $height;
+  box-shadow: 0 0 2px black;
+  border-radius: 5px;
+  background-color: white;
+  &_closed {
+    overflow: hidden;
+  }
+  &-card {
+    margin-bottom: 50px;
+    &:last-child {
+      margin-bottom: 20px;
+    }
+    width: 100%;
+    &__title {
+      @include title;
+      max-width: $width - 30px;
+    }
+    &__general {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      > * {
+        width: 50%;
+      }
+    }
+    &__main {
+      display: block;
+      margin: 10px 0;
+    }
+    &__info {
+      width: 100%;
+      tr:not(:first-child) {
+        td {
+          padding: 5px 0;
+        }
+      }
+      svg {
+        vertical-align: middle;
+      }
+    }
+  }
+}

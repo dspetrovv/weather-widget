@@ -1,0 +1,45 @@
+.locations {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  overflow-y: auto;
+  height: 140px;
+  padding: 3px;
+  padding-left: 0;
+  &__card {
+    &-wrapper {
+      height: 46px;
+      min-height: 46px;
+      &:not(:last-child) {
+        margin-bottom: 10px;
+      }
+      position: relative;
+      &_border {
+        border: 1px solid rgb(90, 214, 255);
+      }
+    }
+    display: flex;
+    padding: 0 10px;
+    background-color: gainsboro;
+    position: absolute;
+    width: -webkit-fill-available;
+    &.dragging {
+      opacity: 0.3;
+    }
+  }
+  &__name {
+    padding-left: 10px;
+    width: 100%;
+    margin: auto;
+    user-select: none;
+  }
+  &__delete {
+    cursor: pointer;
+  }
+  &-error-block {
+    width: $width;
+    height: $height;
+    line-height: $height;
+    text-align: center;
+  }
+}
