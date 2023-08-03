@@ -14,52 +14,72 @@ export const useLocationsStore = defineStore('locations', {
 
   actions: {
     setInitialLocation(newLocation: any) {
-      localStorage.setItem('weather-widget', JSON.stringify(newLocation));
-      this.locations = newLocation;
-      this.locationsList = newLocation;
-      this.locationsListCopy = newLocation;
-      this.isLoadingLocations = false;
+      try {
+        localStorage.setItem('weather-widget', JSON.stringify(newLocation));
+        this.locations = newLocation;
+        this.locationsList = newLocation;
+        this.locationsListCopy = newLocation;
+        this.isLoadingLocations = false;
+      } catch (error: any) {
+        this.isLoadingLocations = false;
+        throw new Error("Error while setting initial location: " + error.message);
+      }
     },
 
-    getInitialLocation() {
-      let coords: ILocation|GeolocationCoordinates|null = null;
-      navigator.geolocation.getCurrentPosition(async (position) => {
-        coords = position.coords;
-        const locationRequest = await this.getLocationInfo(coords.latitude, coords.longitude)
-        let json = await locationRequest.json();
+    async getInitialLocation() {
+      try {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+        const { latitude, longitude } = position.coords;
+        const locationRequest = await this.getLocationInfo(latitude, longitude);
         if (locationRequest.ok) {
+          const json = await locationRequest.json();
           this.setInitialLocation([json]);
         } else {
           this.isLoadingLocations = false;
-          throw new Error(json.message);
+          throw new Error("Error while fetching initial location.");
         }
-      });
+      } catch (error: any) {
+        this.isLoadingLocations = false;
+        throw new Error("Error while getting initial location: " + error.message);
+      }
     },
 
     async getLocations() {
-      let myLocations = localStorage.getItem('weather-widget');
-      this.isLoadingLocations = true;
-      if (myLocations === null || myLocations.length == 2) {
-        this.getInitialLocation();
-      } else {
-        const locations: ILocationList[] = JSON.parse(myLocations);
-        this.locationsList = locations;
-        this.locationsListCopy = locations;
-        for (const [idx, location] of locations.entries()) {
-          await this.getNewLocationInfo(idx, location);
+      try {
+        const myLocations = localStorage.getItem('weather-widget');
+        this.isLoadingLocations = true;
+        if (myLocations === null || myLocations.length <= 2) {
+          await this.getInitialLocation();
+        } else {
+          const locations: ILocationList[] = JSON.parse(myLocations);
+          this.locationsList = locations;
+          this.locationsListCopy = locations;
+          for (const [idx, location] of locations.entries()) {
+            await this.getNewLocationInfo(idx, location);
+          }
+          this.isLoadingLocations = false;
         }
+      } catch (error: any) {
         this.isLoadingLocations = false;
+        throw new Error("Error while getting locations: " + error.message);
       }
     },
 
     async getNewLocationInfo(id: number, location: ILocation) {
-      const request = await this.getLocationInfo(location.coord.lat, location.coord.lon);
-      let json = await request.json();
-      if (request.ok) {
-        this.locations.push(json);
-      } else {
+      try {
+        const request = await this.getLocationInfo(location.coord.lat, location.coord.lon);
+        if (request.ok) {
+          const json = await request.json();
+          this.locations.push(json);
+        } else {
+          this.isLoadingLocations = false;
+          throw new Error("Error while fetching new location info.");
+        }
+      } catch (error: any) {
         this.isLoadingLocations = false;
-        throw new Error(json.message);
+        throw new Error("Error while getting new location info: " + error.message);
       }
     },
 
@@ -67,24 +87,23 @@ export const useLocationsStore = defineStore('locations', {
       try {
         const newLocation = this.searchLocations.find((_, index) => idx === index)!;
         const locationRequest = await this.getLocationInfo(newLocation.lat, newLocation.lon);
-        let json = await locationRequest.json();
         if (locationRequest.ok) {
+          const json = await locationRequest.json();
           const locationsLengthBefore = this.locations.length;
           const locationsListLengthBefore = this.locationsList.length;
-          this.locations.unshift({...json});
-          this.locationsList.unshift({...json});
+          this.locations.unshift({ ...json });
+          this.locationsList.unshift({ ...json });
           this.makeLocationsUnique(locationsLengthBefore, locationsListLengthBefore)
-          this.locationsListCopy = [ ...this.locationsList ];
-          
-          this.updateLocalStorage(this.locations)
+          this.locationsListCopy = [...this.locationsList];
+          this.updateLocalStorage(this.locations);
         } else {
-          throw new Error(json.message);
+          throw new Error("Error while fetching location data.");
         }
       } catch (error: any) {
-        this.addingLocationError = error;
+        this.addingLocationError = error.message;
       }
     },
-    
+
     deleteLocation(id: number) {
       this.locations = this.locations.filter((location) => location.id !== id);
       this.locationsList = this.locationsList.filter((location) => location.id !== id);
@@ -100,15 +119,21 @@ export const useLocationsStore = defineStore('locations', {
     },
 
     async getLocationInfo(latitude: number, longitude: number) {
-      return await fetch(api.locationsInfoUrl(latitude, longitude))
+      return await fetch(api.locationsInfoUrl(latitude, longitude));
     },
 
-    findLocations(search: string) {
-      fetch(api.locationsFindUrl(search))
-        .then((resp) => resp.json())
-        .then((json) => {
+    async findLocations(search: string) {
+      try {
+        const response = await fetch(api.locationsFindUrl(search));
+        if (response.ok) {
+          const json = await response.json();
           this.searchLocations = json;
-        })
+        } else {
+          throw new Error("Error while searching locations.");
+        }
+      } catch (error: any) {
+        throw new Error("Error while finding locations: " + error.message);
+      }
     },
 
     clearSearchLocations() {
@@ -143,8 +168,8 @@ export const useLocationsStore = defineStore('locations', {
     },
 
     rewriteLocationsCopy() {
-      this.locationsListCopy = [ ...this.locationsList ];
-      const tmpLocationsCopy = [ ...this.locations ];
+      this.locationsListCopy = [...this.locationsList];
+      const tmpLocationsCopy = [...this.locations];
       this.locationsList.forEach((location, idx) => {
         let index = tmpLocationsCopy.findIndex((loc) => loc.id === location.id);
         this.locations[idx] = tmpLocationsCopy[index];

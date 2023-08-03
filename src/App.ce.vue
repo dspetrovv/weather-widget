@@ -67,10 +67,15 @@ export default defineComponent({
       this.isSettingsOpened = !this.isSettingsOpened;
     },
     getInfo(info: ILocation) {
-      return `Feels like ${info.main?.feels_like}°C, ${info.weather[0]?.description}.`
+      const feelsLike = info.main?.feels_like;
+      const description = info.weather[0]?.description;
+      if (feelsLike === undefined) {
+        return 'Error while fetching temperature';
+      }
+      return `Feels like ${feelsLike}°C${`, ${description}`}.`;
     },
-    getPlace(name: string, country: string|undefined) {
-      return `${name}, ${country}`;
+    getPlace(name: string, country: string | undefined) {
+      return `${name}, ${country || 'Unknown'}`;
     },
     reload() {
       this.getLocations();

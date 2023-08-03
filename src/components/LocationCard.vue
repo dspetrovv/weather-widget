@@ -3,15 +3,15 @@
     <burger-icon @mousedown="dragOn" @mouseleave="dragOff" />
     <div class="locations__name">{{ name }}</div>
     <div class="locations__delete">
-      <delete-icon @click="deleteLocation" />
+      <delete-icon @click="deleteLocationHandler" />
     </div>
   </div>
 </template>
 <script lang="ts">
 import { useLocationsStore } from '@/store/locationsStore';
 import { defineComponent, PropType, ref } from 'vue'
-import BurgerIcon from './icons/BurgerIcon.vue';
-import DeleteIcon from './icons/DeleteIcon.vue';
+import BurgerIcon from '@/components/icons/BurgerIcon.vue';
+import DeleteIcon from '@/components/icons/DeleteIcon.vue';
 
 export default defineComponent({
   props: {
@@ -27,25 +27,32 @@ export default defineComponent({
 
   components: { BurgerIcon, DeleteIcon },
   setup(props) {
-    const locationStore = useLocationsStore();
-    const location = ref<HTMLElement>();
+    const { deleteLocation } = useLocationsStore();
+    const location = ref<HTMLElement | null>(null);
+
     function dragOn() {
-      location.value!.draggable = true;
-      location.value!.classList.toggle('dragging');
+      if (location.value) {
+        location.value.draggable = true;
+        location.value.classList.toggle('dragging');
+      }
     }
+
     function dragOff() {
-      location.value!.draggable = false;
-      location.value!.classList.remove('dragging');
+      if (location.value) {
+        location.value.draggable = false;
+        location.value.classList.remove('dragging');
+      }
     }
-    function deleteLocation() {
-      locationStore.deleteLocation(props.id);
+
+    function deleteLocationHandler() {
+      deleteLocation(props.id);
     }
 
     return {
       location,
       dragOn,
       dragOff,
-      deleteLocation,
+      deleteLocationHandler,
     };
   }
 })

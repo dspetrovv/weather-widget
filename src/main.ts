@@ -11,5 +11,5 @@ const createAppWrapper: CreateAppFunction<Element> = (component) => {
   .use(pinia)
 }
 
-const WeatherWidget = webComponentWrapper(App, createAppWrapper, h,);
+const WeatherWidget = webComponentWrapper(App, createAppWrapper, h);
 customElements.define('weather-widget', WeatherWidget);

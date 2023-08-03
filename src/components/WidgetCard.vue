@@ -38,8 +38,7 @@ export default defineComponent({
       required: true,
     },
     deg: {
-      type: Number as PropType<number>,
-      required: true,
+      type: Number as PropType<number> | undefined,
     },
     info: {
       type: String as PropType<string>,
@@ -50,12 +49,10 @@ export default defineComponent({
       required: true,
     },
     pressure: {
-      type: Number as PropType<number>,
-      required: true,
+      type:  Number as PropType<number> | undefined,
     },
     humidity: {
-      type: Number as PropType<number>,
-      required: true,
+      type:  Number as PropType<number> | undefined,
     },
     visibility: {
       type: Number as PropType<number>,

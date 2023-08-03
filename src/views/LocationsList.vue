@@ -22,7 +22,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import LocationCard from '@/components/LocationCard.vue';
-import useLocationsFunctions from '../functions/locations-functions';
+import useLocationsFunctions from '@/functions/locations-functions';
 
 export default defineComponent({
   components: { LocationCard },
